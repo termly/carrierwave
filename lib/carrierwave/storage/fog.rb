@@ -418,11 +418,24 @@ module CarrierWave
         # [NilClass] no url available
         #
         def url(options = {})
-          if !@uploader.fog_public
-            authenticated_url(options)
-          else
-            public_url
-          end
+          # @justrudd - in our (termly) usage of CarrierWave, we're always
+          # configured with fog-aws. We want the objects that CarrierWave
+          # uploads via fog to be private. So we set `fog_public = false`. But
+          # when setting that our outgoing URLs are signed S3 URLs and not the
+          # CloudFront distribution host that we configured via `assets_host`
+          # setting.
+          #
+          # There are the options that get passed in. We could have an option
+          # that forces the usage of #public_url. But that doesn't address
+          # converting to JSON. The implicit conversion by Grape and Rails gives
+          # us no opportunity to pass in options.
+          #
+          # Therefore in our fork (termly/carrierwave), we're just going to
+          # always be public. One day when there is more time, we'll try to
+          # figure out a better way of doing this that can be contributed back
+          # upstream.
+
+          public_url
         end
 
         ##
